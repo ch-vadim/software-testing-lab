@@ -23,21 +23,24 @@ public class ExtendedTask extends Task{
 
     @Override
     public void run() {
-        while (true) {
-            if (state.equals(State.RUNNING)) {
-                Processor.waitTick();
+        while (!isCompleted) {
+            Processor.waitTick();
+            if (_state.equals(TaskState.RUNNING)) {
                 if (ticks>0) {
                     ticks--;
                     ticksBeforeWaiting--;
                     if (ticksBeforeWaiting == 0) {
+                        ticksBeforeWaiting--;
                         _wait();
                     }
                     if (ticks==0) {
                         terminate();
-                        break;
+                        isCompleted = true;
+                        this.interrupt();
+                        return;
                     }
                 }
-            } else if (state.equals(State.WAITING)) {
+            } else if (_state.equals(TaskState.WAITING)) {
                 Processor.waitTick();
                 if (waitingTicks>0) {
                     waitingTicks--;
@@ -56,7 +59,7 @@ public class ExtendedTask extends Task{
                 "id=" + id +
                 ", priority=" + priority +
                 ", ticks=" + ticks +
-                ", state=" + state +
+                ", state=" + _state +
                 ", ticksBeforeWaiting=" + ticksBeforeWaiting +
                 ", waitingTicks=" + waitingTicks +
                 '}';

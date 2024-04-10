@@ -1,25 +1,25 @@
 package org.testing.tasks;
 
 public enum Transition {
-    ACTIVATE(State.SUSPENDED, State.READY),
-    START(State.READY, State.RUNNING),
-    PREEMPT(State.RUNNING, State.READY),
-    WAIT(State.RUNNING, State.WAITING),
-    RELEASE(State.WAITING, State.READY),
-    TERMINATE(State.RUNNING, State.SUSPENDED);
-    public final State prevState;
-    public final State nextState;
+    ACTIVATE(TaskState.SUSPENDED, TaskState.READY),
+    START(TaskState.READY, TaskState.RUNNING),
+    PREEMPT(TaskState.RUNNING, TaskState.READY),
+    WAIT(TaskState.RUNNING, TaskState.WAITING),
+    RELEASE(TaskState.WAITING, TaskState.READY),
+    TERMINATE(TaskState.RUNNING, TaskState.SUSPENDED);
+    public final TaskState prevState;
+    public final TaskState nextState;
 
-    Transition(State prevState, State nextState) {
+    Transition(TaskState prevState, TaskState nextState) {
         this.prevState = prevState;
         this.nextState = nextState;
     }
 
-    public State getPrevState() {
+    public TaskState getPrevState() {
         return prevState;
     }
 
-    public State getNextState() {
+    public TaskState getNextState() {
         return nextState;
     }
 }

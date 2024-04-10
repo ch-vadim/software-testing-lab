@@ -1,6 +1,6 @@
 package org.testing.system;
 
-import org.testing.tasks.State;
+import org.testing.tasks.TaskState;
 import org.testing.tasks.Task;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public class Scheduler implements Runnable {
     private final BlockingQueue<Task> buffer = new LinkedBlockingQueue<>();
     private final PriorityBlockingQueue<Task> readyTasks = new PriorityBlockingQueue<>();
     private final PriorityBlockingQueue<Task> waitingTasks =
-            new PriorityBlockingQueue<>(DEFAULT_MAX_COUNT_READY_TASKS, Comparator.comparing(Task::getState));
+            new PriorityBlockingQueue<>(DEFAULT_MAX_COUNT_READY_TASKS, Comparator.comparing(Task::_getState));
 
     private final int maxCountReadyTasks;
 
@@ -49,7 +49,7 @@ public class Scheduler implements Runnable {
                 System.out.println("Current queue size: " + (readyTasks.size() + waitingTasks.size()));
             }
             while (waitingTasks.size() != 0 &&
-                    waitingTasks.peek().getState().equals(State.READY)) {
+                    waitingTasks.peek()._getState().equals(TaskState.READY)) {
                 Task task = waitingTasks.take();
                 System.out.println("Task released after waiting: " + task);
                 readyTasks.add(task);
@@ -58,33 +58,33 @@ public class Scheduler implements Runnable {
     }
 
     private boolean isCompleted() {
-        return executableTask != null && executableTask.getTicks() == 0;
+        return executableTask != null && executableTask.isCompleted();
     }
 
     private boolean isWaiting() {
-        return executableTask != null && executableTask.getState().equals(State.WAITING);
+        return executableTask != null && executableTask._getState().equals(TaskState.WAITING);
     }
 
     private void checkMorePriority() throws InterruptedException {
         if (executableTask == null) {
             if (!readyTasks.isEmpty()) {
                 executableTask = readyTasks.take();
-                Thread thread = new Thread(executableTask);
-                thread.start();
-                executableTask.start();
+                if (executableTask.getState().equals(Thread.State.NEW))
+                    executableTask.start();
+                executableTask._start();
             }
         } else {
             if (!readyTasks.isEmpty()) {
                 Task task = readyTasks.peek();
-                if (executableTask.getPriority().compareTo(task.getPriority()) > 0) {
+                if (executableTask._getPriority().compareTo(task._getPriority()) > 0) {
                     readyTasks.take();
                     executableTask.preempt();
                     readyTasks.add(executableTask);
                     System.out.println("Task: " + executableTask + " was replaced by higher priority: " + task);
                     executableTask = task;
-                    Thread thread = new Thread(executableTask);
-                    thread.start();
-                    executableTask.start();
+                    executableTask._start();
+                    if (executableTask.getState().equals(Thread.State.NEW))
+                        executableTask.start();
                 }
             }
         }

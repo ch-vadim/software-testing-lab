@@ -1,6 +1,6 @@
 package org.testing.tasks;
 
-public enum State {
+public enum TaskState {
     RUNNING,
     WAITING,
     READY,

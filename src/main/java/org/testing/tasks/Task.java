@@ -3,27 +3,26 @@ package org.testing.tasks;
 import org.testing.exceptions.IllegalTaskStateException;
 import org.testing.system.Processor;
 
-public class Task implements Runnable, Comparable<Task>{
+public class Task extends Thread implements Comparable<Task>{
     protected final long id;
 
     protected Priority priority;
     protected int ticks;
-    protected State state;
+    protected TaskState _state;
+    protected boolean isCompleted = false;
 
     public Task(long id, int ticks, Priority priority) {
         this.id = id;
         this.ticks = ticks;
         this.priority = priority;
-        state = State.SUSPENDED;
+        _state = TaskState.SUSPENDED;
     }
 
-    public State getState() {
-        return state;
+    public TaskState _getState() {
+        return _state;
     }
-    public int getTicks() {
-        return ticks;
-    }
-    public Priority getPriority() {
+
+    public Priority _getPriority() {
         return priority;
     }
 
@@ -31,7 +30,7 @@ public class Task implements Runnable, Comparable<Task>{
         doTransition(Transition.ACTIVATE);
     }
 
-    public void start() {
+    public void _start() {
         doTransition(Transition.START);
     }
 
@@ -44,29 +43,33 @@ public class Task implements Runnable, Comparable<Task>{
     }
 
     public void _wait() {
-        throw new RuntimeException();
+        throw new IllegalTaskStateException("Primary task can't do wait transition");
     }
     public void release() {
-        throw new RuntimeException();
+        throw new IllegalTaskStateException("Primary task can't do release transition");
     }
 
     protected void doTransition(Transition transition) {
-        if (!state.equals(transition.prevState))
+        if (!_state.equals(transition.prevState))
             throw new IllegalTaskStateException(this+" with transition"+transition);
-        this.state = transition.nextState;
+        this._state = transition.nextState;
 
     }
 
+    public boolean isCompleted() { return isCompleted;}
+
     @Override
     public void run() {
-        while (true) {
-            if (state.equals(State.RUNNING)) {
-                Processor.waitTick();
+        while (!isCompleted) {
+            Processor.waitTick();
+            if (_state.equals(TaskState.RUNNING)) {
                 if (ticks>0) {
                     ticks--;
                     if (ticks==0) {
                         terminate();
-                        break;
+                        isCompleted = true;
+                        this.interrupt();
+                        return;
                     }
                 }
             }
@@ -84,7 +87,7 @@ public class Task implements Runnable, Comparable<Task>{
                 "id=" + id +
                 ", priority=" + priority +
                 ", ticks=" + ticks +
-                ", state=" + state +
+                ", state=" + _state +
                 '}';
     }
 }
