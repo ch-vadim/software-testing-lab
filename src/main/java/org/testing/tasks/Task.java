@@ -3,6 +3,8 @@ package org.testing.tasks;
 import org.testing.exceptions.IllegalTaskStateException;
 import org.testing.system.Processor;
 
+import java.util.Objects;
+
 public class Task extends Thread implements Comparable<Task>{
     protected final long id;
 
@@ -89,5 +91,18 @@ public class Task extends Thread implements Comparable<Task>{
                 ", ticks=" + ticks +
                 ", state=" + _state +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id && priority == task.priority;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, priority);
     }
 }

@@ -13,16 +13,16 @@ import java.util.concurrent.PriorityBlockingQueue;
 public class Scheduler implements Runnable {
 
     private static final int DEFAULT_MAX_COUNT_READY_TASKS = 10;
-    private final BlockingQueue<Task> buffer = new LinkedBlockingQueue<>();
-    private final PriorityBlockingQueue<Task> readyTasks = new PriorityBlockingQueue<>();
-    private final PriorityBlockingQueue<Task> waitingTasks =
+    public final BlockingQueue<Task> buffer = new LinkedBlockingQueue<>();
+    public final PriorityBlockingQueue<Task> readyTasks = new PriorityBlockingQueue<>();
+    public final PriorityBlockingQueue<Task> waitingTasks =
             new PriorityBlockingQueue<>(DEFAULT_MAX_COUNT_READY_TASKS, Comparator.comparing(Task::_getState));
 
     private final int maxCountReadyTasks;
 
-    private Task executableTask;
+    public Task executableTask;
 
-    private final List<Task> completableTasks = new ArrayList<>();
+    public final List<Task> completableTasks = new ArrayList<>();
 
     public Scheduler() {
         this(DEFAULT_MAX_COUNT_READY_TASKS);

@@ -41,7 +41,6 @@ public class ExtendedTask extends Task{
                     }
                 }
             } else if (_state.equals(TaskState.WAITING)) {
-                Processor.waitTick();
                 if (waitingTicks>0) {
                     waitingTicks--;
                     if (waitingTicks == 0) {

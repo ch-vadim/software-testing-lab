@@ -15,11 +15,4 @@ public enum Transition {
         this.nextState = nextState;
     }
 
-    public TaskState getPrevState() {
-        return prevState;
-    }
-
-    public TaskState getNextState() {
-        return nextState;
-    }
 }
